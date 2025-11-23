@@ -258,3 +258,72 @@ AutoPlayButton.MouseButton1Click:Connect(function()
         InfoLabel.Text = "Status: Auto replay tắt"
     end
 end)
+-- Load boombox script từ GitHub
+local BoomboxScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/bilong260820-ai/Roblox-script-boombox-k/main/Boombox.lua", true))()
+
+-- GUI
+local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 300, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.Active = true
+MainFrame.Draggable = true -- Kéo được
+MainFrame.Parent = ScreenGui
+
+-- Auto Play Button
+local AutoPlayBtn = Instance.new("TextButton")
+AutoPlayBtn.Size = UDim2.new(0, 200, 0, 50)
+AutoPlayBtn.Position = UDim2.new(0.5, -100, 0, 10)
+AutoPlayBtn.Text = "Auto Play: OFF"
+AutoPlayBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+AutoPlayBtn.TextColor3 = Color3.new(1,1,1)
+AutoPlayBtn.Parent = MainFrame
+
+local autoPlay = false
+AutoPlayBtn.MouseButton1Click:Connect(function()
+    autoPlay = not autoPlay
+    AutoPlayBtn.Text = autoPlay and "Auto Play: ON" or "Auto Play: OFF"
+end)
+
+-- List nhạc sống (ví dụ)
+local musicList = {
+    {Name="Song 1", Id=12345678},
+    {Name="Song 2", Id=23456789},
+    {Name="Song 3", Id=34567890},
+}
+
+-- ScrollFrame chứa button nhạc
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Size = UDim2.new(1, -20, 1, -80)
+ScrollFrame.Position = UDim2.new(0, 10, 0, 70)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, #musicList * 50)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.Parent = MainFrame
+
+for i, music in ipairs(musicList) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.Position = UDim2.new(0, 0, 0, (i-1)*45)
+    btn.Text = music.Name
+    btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Parent = ScrollFrame
+
+    btn.MouseButton1Click:Connect(function()
+        if BoomboxScript.PlaySound then
+            BoomboxScript:PlaySound(music.Id)
+        end
+    end)
+end
+
+-- Auto Play logic
+game:GetService("RunService").RenderStepped:Connect(function()
+    if autoPlay and BoomboxScript.CurrentSound then
+        if not BoomboxScript.CurrentSound.IsPlaying then
+            BoomboxScript.CurrentSound:Play()
+        end
+    end
+end)
